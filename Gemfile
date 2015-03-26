@@ -16,3 +16,5 @@ gem 'sinatra-contrib'
 
 # Talk to github
 gem 'octokit'
+gem 'freshdesk'
+gem 'xml-simple' #parse xml
