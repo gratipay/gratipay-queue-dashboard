@@ -21,15 +21,18 @@ class Github
   end
 
   def issues_by_label(label, pr=false)
-    issues label: label, pr:pr
+    return issues label: label, pr:pr if pr
+    org_issues labels: label
   end
 
   def issues_by_repo(repo, pr=false)
-    issues repo: "#{@org_name}/#{repo}", pr:pr
+    return issues repo: "#{@org_name}/#{repo}", pr:pr if pr
+    repo_issues repo
   end
 
   def issues_by_repo_and_label(repo, label, pr=false)
-    issues repo: "#{@org_name}/#{repo}", label: label, pr: pr
+    return issues repo: "#{@org_name}/#{repo}", label: label, pr: pr if pr
+    repo_issues repo, labels: label
   end
 
   def pr_ready_for_review()
@@ -45,7 +48,22 @@ class Github
   # Returns the count of the search query
   def search_issues(query)
     # https://help.github.com/articles/searching-issues/#search-within-a-users-or-organizations-repositories
-    issues = @client.search_issues "state:open user:gratipay #{query}", :per_page=>0
+    issues = @client.search_issues "state:open user:#{@org_name} #{query}", :per_page=>0
     issues.total_count
+  end
+
+  def org_issues(opt = Hash.new)
+    opt[:state] = 'open'
+    opt[:filter]= 'all'
+    issues = @client.org_issues @org_name, opt
+    issues.size
+  end
+
+  def repo_issues(repo, opt = Hash.new)
+    opt[:state] = 'open'
+    opt[:filter]= 'all'
+    repo = "#{@org_name}/#{repo}"
+    issues = @client.list_issues repo, opt
+    issues.size
   end
 end
